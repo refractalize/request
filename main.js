@@ -720,6 +720,10 @@ Request.prototype.oauth = function (_oauth) {
   if (this.uri.query) {
     form = qs.parse(this.uri.query)
   } 
+
+  var inQueryString = _oauth.inQueryString;
+  delete _oauth.inQueryString;
+
   if (!form) form = {}
   var oa = {}
   for (var i in form) oa[i] = form[i]
@@ -746,9 +750,17 @@ Request.prototype.oauth = function (_oauth) {
       delete oa['oauth_'+i]
     }
   }
-  this.headers.Authorization = 
-    'OAuth '+Object.keys(oa).sort().map(function (i) {return i+'="'+oauth.rfc3986(oa[i])+'"'}).join(',')
-  this.headers.Authorization += ',oauth_signature="'+oauth.rfc3986(signature)+'"'
+
+  if (inQueryString) {
+    var oauthQueryString = Object.keys(oa).sort().map(function (i) {return i+'='+oauth.rfc3986(oa[i]);}).join('&');
+    oauthQueryString += '&oauth_signature=' + oauth.rfc3986(signature);
+    this.uri.query = oauthQueryString;
+    this.uri.path = this.uri.pathname + '?' + this.uri.query;
+  } else {
+    this.headers.Authorization = 
+      'OAuth '+Object.keys(oa).sort().map(function (i) {return i+'="'+oauth.rfc3986(oa[i])+'"'}).join(',')
+    this.headers.Authorization += ',oauth_signature="'+oauth.rfc3986(signature)+'"'
+  }
   return this
 }
 Request.prototype.jar = function (jar) {

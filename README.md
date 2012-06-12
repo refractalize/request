@@ -139,6 +139,9 @@ request.post({url:url, oauth:oauth}, function (e, r, body) {
 })
 ```
 
+Additionally, the `oauth` object can contain:
+
+* `inQueryString`: if `true`, the `oauth_*` parameters are sent in the query string, if `false` they are sent in the Authorization header.
 
 
 ### request(options, callback)
